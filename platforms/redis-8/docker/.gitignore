@@ -1,0 +1,7 @@
+# .gitignore custom settings
+.env
+/data
+/redis-data
+/log
+/config/conf.d/*
+!/config/conf.d/.gitkeep
