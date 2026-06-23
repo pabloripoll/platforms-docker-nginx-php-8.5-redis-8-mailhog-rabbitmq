@@ -123,41 +123,41 @@ apirest-destroy: ## destroys completly the apirest container
 	fi
 
 # -------------------------------------------------------------------------------------------------
-#  Database Service
+#  Redis Service
 # -------------------------------------------------------------------------------------------------
-.PHONY: db-hostcheck db-info db-set db-create db-ssh db-start db-stop db-destroy
+.PHONY: redis-hostcheck redis-info redis-set redis-create redis-ssh redis-start redis-stop redis-destroy
 
-db-hostcheck: ## shows this project ports availability on local machine for database container
+redis-hostcheck: ## shows this project ports availability on local machine for database container
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) port-check
 
-db-info: ## shows docker related information
+redis-info: ## shows docker related information
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) info
 
-db-set: ## sets the database enviroment file to build the container
+redis-set: ## sets the database enviroment file to build the container
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) env-set
 
-db-build: ## builds and ensures changes in the Dockerfile, build steps, or copied-in files are applied
+redis-build: ## builds and ensures changes in the Dockerfile, build steps, or copied-in files are applied
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) build
 
-db-create: ## starts up or creates the container for running in detached mode
+redis-create: ## starts up or creates the container for running in detached mode
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) up
 
-db-network: ## starts up into an existing custom network for container-to-container communication, runnning in detached mode
+redis-network: ## starts up into an existing custom network for container-to-container communication, runnning in detached mode
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) clear network
 
-db-ssh: ## enters the container shell
+redis-ssh: ## enters the container shell
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) ssh
 
-db-start: ## starts the database container running
+redis-start: ## starts the database container running
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) start
 
-db-stop: ## stops the database container but its assets will not be destroyed
+redis-stop: ## stops the database container but its assets will not be destroyed
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) stop
 
-db-restart: ## restarts the running database container
+redis-restart: ## restarts the running database container
 	cd platforms/$(DATABASE_PLTF) && $(MAKE) restart
 
-db-destroy: ## destroys completly the database container with its data
+redis-destroy: ## destroys completly the database container with its data
 	echo ${C_RED}"Attention!"${C_END};
 	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container and delete its image resource and persistance data."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
@@ -174,32 +174,6 @@ db-destroy: ## destroys completly the database container with its data
 			echo ${C_GRN}"O.K.! DOCKER cache has been cleared up."${C_END}; \
 		fi \
 	fi
-
-.PHONY: db-test-up db-test-down
-
-db-test-up: ## creates a side database for testing porpuses
-	cd platforms/$(DATABASE_PLTF) && $(MAKE) test-up
-
-db-test-down: ## drops the side testing database
-	cd platforms/$(DATABASE_PLTF) && $(MAKE) test-down
-
-.PHONY: db-sql-install db-sql-replace db-sql-backup db-sql-remote db-copy-remote
-
-db-sql-install: ## migrates sql file with schema / data into the container main database to init a project
-	$(MAKE) local-ownership-set;
-	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-install
-
-db-sql-replace: ## replaces the container main database with the latest database .sql backup file
-	$(MAKE) local-ownership-set;
-	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-replace
-
-db-sql-backup: ## copies the container main database as backup into a .sql file
-	$(MAKE) local-ownership-set;
-	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-backup
-
-db-sql-drop: ## drops the container main database but recreates the database without schema as a reset action
-	$(MAKE) local-ownership-set;
-	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-drop
 
 # -------------------------------------------------------------------------------------------------
 #  Mailer Service
