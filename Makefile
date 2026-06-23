@@ -125,45 +125,45 @@ apirest-destroy: ## destroys completly the apirest container
 # -------------------------------------------------------------------------------------------------
 #  Database Service
 # -------------------------------------------------------------------------------------------------
-.PHONY: redis-hostcheck redis-info redis-set redis-create redis-ssh redis-start redis-stop redis-destroy
+.PHONY: db-hostcheck db-info db-set db-create db-ssh db-start db-stop db-destroy
 
-redis-hostcheck: ## shows this project ports availability on local machine for database container
-	cd platforms/$(REDIS_PLTF) && $(MAKE) port-check
+db-hostcheck: ## shows this project ports availability on local machine for database container
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) port-check
 
-redis-info: ## shows docker related information
-	cd platforms/$(REDIS_PLTF) && $(MAKE) info
+db-info: ## shows docker related information
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) info
 
-redis-set: ## sets the database enviroment file to build the container
-	cd platforms/$(REDIS_PLTF) && $(MAKE) env-set
+db-set: ## sets the database enviroment file to build the container
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) env-set
 
-redis-build: ## builds and ensures changes in the Dockerfile, build steps, or copied-in files are applied
-	cd platforms/$(REDIS_PLTF) && $(MAKE) build
+db-build: ## builds and ensures changes in the Dockerfile, build steps, or copied-in files are applied
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) build
 
-redis-create: ## starts up or creates the container for running in detached mode
-	cd platforms/$(REDIS_PLTF) && $(MAKE) up
+db-create: ## starts up or creates the container for running in detached mode
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) up
 
-redis-network: ## starts up into an existing custom network for container-to-container communication, runnning in detached mode
-	cd platforms/$(REDIS_PLTF) && $(MAKE) clear network
+db-network: ## starts up into an existing custom network for container-to-container communication, runnning in detached mode
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) clear network
 
-redis-ssh: ## enters the container shell
-	cd platforms/$(REDIS_PLTF) && $(MAKE) ssh
+db-ssh: ## enters the container shell
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) ssh
 
-redis-start: ## starts the database container running
-	cd platforms/$(REDIS_PLTF) && $(MAKE) start
+db-start: ## starts the database container running
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) start
 
-redis-stop: ## stops the database container but its assets will not be destroyed
-	cd platforms/$(REDIS_PLTF) && $(MAKE) stop
+db-stop: ## stops the database container but its assets will not be destroyed
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) stop
 
-redis-restart: ## restarts the running database container
-	cd platforms/$(REDIS_PLTF) && $(MAKE) restart
+db-restart: ## restarts the running database container
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) restart
 
-redis-destroy: ## destroys completly the database container with its data
+db-destroy: ## destroys completly the database container with its data
 	echo ${C_RED}"Attention!"${C_END};
-	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(REDIS_PLTF)"${C_END}" container and delete its image resource and persistance data."${C_END};
+	echo ${C_YEL}"You're about to remove the "${C_BLU}"$(DATABASE_PLTF)"${C_END}" container and delete its image resource and persistance data."${C_END};
 	@echo -n ${C_RED}"Are you sure to proceed? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
         echo ${C_GRN}"K.O.! container has been stopped but not destroyed."${C_END}; \
     else \
-		cd platforms/$(REDIS_PLTF) && $(MAKE) clear destroy; \
+		cd platforms/$(DATABASE_PLTF) && $(MAKE) clear destroy; \
 		echo -n ${C_GRN}"Do you want to clear DOCKER cache? "${C_END}"[y/n]: " && read response && if [ $${response:-'n'} != 'y' ]; then \
 			echo ${C_YEL}"The following commands are delegated to be executed by user:"${C_END}; \
 			echo "$$ $(DOCKER) system prune"; \
@@ -174,6 +174,32 @@ redis-destroy: ## destroys completly the database container with its data
 			echo ${C_GRN}"O.K.! DOCKER cache has been cleared up."${C_END}; \
 		fi \
 	fi
+
+.PHONY: db-test-up db-test-down
+
+db-test-up: ## creates a side database for testing porpuses
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) test-up
+
+db-test-down: ## drops the side testing database
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) test-down
+
+.PHONY: db-sql-install db-sql-replace db-sql-backup db-sql-remote db-copy-remote
+
+db-sql-install: ## migrates sql file with schema / data into the container main database to init a project
+	$(MAKE) local-ownership-set;
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-install
+
+db-sql-replace: ## replaces the container main database with the latest database .sql backup file
+	$(MAKE) local-ownership-set;
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-replace
+
+db-sql-backup: ## copies the container main database as backup into a .sql file
+	$(MAKE) local-ownership-set;
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-backup
+
+db-sql-drop: ## drops the container main database but recreates the database without schema as a reset action
+	$(MAKE) local-ownership-set;
+	cd platforms/$(DATABASE_PLTF) && $(MAKE) sql-drop
 
 # -------------------------------------------------------------------------------------------------
 #  Mailer Service
@@ -286,8 +312,9 @@ repo-flush: ## echoes clearing commands for git repository cache on local IDE an
 	echo ${C_YEL}"Clear repository for untracked files:"${C_END}
 	echo ${C_YEL}"$$"${C_END}" git rm -rf --cached .; git add .; git commit -m \"maint: cache cleared for untracked files\""
 	echo ""
-	echo ${C_YEL}"Platform repository against REST API repository:"${C_END}
-	echo ${C_YEL}"$$"${C_END}" git rm -r --cached -- \"apirest/*\" \":(exclude)apirest/.gitkeep\""
+	echo ${C_YEL}"Detach REST/GRPC API repository from platforms repository:"${C_END}
+	echo ${C_YEL}"$$"${C_END}" git rm -r --cached -- \"api-rest/*\" \":(exclude)api-rest/.gitkeep\""
+	echo ${C_YEL}"$$"${C_END}" git rm -r --cached -- \"api-grpc/*\" \":(exclude)api-grpc/.gitkeep\""
 
 repo-commit: ## echoes common git commands
 	echo ${C_YEL}"Common commiting commands:"${C_END}
