@@ -10,8 +10,8 @@ services:
     environment:
       REDIS_ROOT_USER: ${REDIS_ROOT_USER}
       REDIS_ROOT_PASSWORD: ${REDIS_ROOT_PASSWORD}
-      REDIS_APP_USER: ${REDIS_APP_USER}
-      REDIS_APP_PASSWORD: ${REDIS_APP_PASSWORD}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - ${COMPOSE_PROJECT_BIND}:/data
     deploy:

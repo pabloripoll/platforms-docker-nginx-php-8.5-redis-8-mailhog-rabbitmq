@@ -81,25 +81,18 @@ RUN apk add --no-cache \
   #php85-mysqlnd \
   #php85-mysqli \
   ## Postgre
-  php85-pgsql \
-  php85-pdo_pgsql \
-  postgresql-dev
+  #php85-pgsql \
+  #php85-pdo_pgsql \
+  #postgresql-dev \
   ## MongoDB
   #php85-pecl-mongodb \
   ## Redis
-  #php85-pecl-amqp
+  php85-pecl-redis \
+  ## RabbitMQ
+  rabbitmq-c \
+  php85-pecl-amqp
   ## XDebug
   #php85-pecl-xdebug
-
-## Install amqp via PECL for clients that use the native ext-amqp like RabbitMQ
-#RUN apk add --no-cache rabbitmq-c
-#RUN set -eux; \
-#    apk add --no-cache --virtual .amqp-build-deps $PHPIZE_DEPS rabbitmq-c-dev; \
-#    pecl install amqp; \
-#    docker-php-ext-enable amqp; \
-#    php -m | grep -i amqp; \
-#    apk del .amqp-build-deps; \
-#    rm -rf /tmp/pear ~/.pearrc
 
 ## Install MongoDB extension from PECL
 #RUN pecl install mongodb-2.1.0 \
@@ -111,7 +104,7 @@ RUN docker-php-ext-install \
   ## Mysql - Mariadb
   #pdo_mysql \
   ## Postgre
-  pdo_pgsql \
+  #pdo_pgsql \
   ## Sockets
   sockets \
   ## Process Control (jobs)

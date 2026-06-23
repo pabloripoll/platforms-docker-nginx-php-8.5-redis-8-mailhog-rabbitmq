@@ -64,12 +64,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ## Mysql - Mariadb
     #default-libmysqlclient-dev \
     ## Postgre
-    libpq-dev \
+    #libpq-dev \
     ## MongoDB (for PECL extension)
     #pkg-config \
     #libssl-dev \
     ## RabbitMQ / AMQP
-    #librabbitmq-dev \
+    librabbitmq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 ## Configure and install PHP GD extension
@@ -84,8 +84,8 @@ RUN docker-php-ext-install -j$(nproc) \
     #pdo_mysql \
     #mysqli \
     ## Postgre
-    pdo_pgsql \
-    pgsql \
+    #pdo_pgsql \
+    #pgsql \
     ## Other extensions
     zip \
     bcmath \
@@ -99,19 +99,19 @@ RUN docker-php-ext-install -j$(nproc) \
     opcache
 
 ## Install amqp via PECL for clients that use the native ext-amqp like RabbitMQ
-#RUN apt-get update && apt-get install -y --no-install-recommends librabbitmq-dev \
-#    && rm -rf /var/lib/apt/lists/* \
-#    && pecl install amqp \
-#    && docker-php-ext-enable amqp \
-#    && php -m | grep -i amqp
+RUN apt-get update && apt-get install -y --no-install-recommends librabbitmq-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && pecl install amqp \
+    && docker-php-ext-enable amqp \
+    && php -m | grep -i amqp
 
 ## Install MongoDB extension from PECL
 #RUN pecl install mongodb-2.1.0 \
 #    && docker-php-ext-enable mongodb
 
 ## Install Redis extension from PECL
-#RUN pecl install redis \
-#    && docker-php-ext-enable redis
+RUN pecl install redis \
+    && docker-php-ext-enable redis
 
 ## Install XDebug from PECL
 #RUN pecl install xdebug \

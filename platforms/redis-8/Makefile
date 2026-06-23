@@ -30,8 +30,8 @@ DOCKER_CAAS=$(REDIS_CAAS)
 DOCKER_PORT=$(REDIS_PORT)
 DOCKER_BIND=$(REDIS_BIND)
 DOCKER_CPUS=$(REDIS_CAAS_CPUS)
-DOCKER_CAAS_MEM=$(REDIS_CAAS_MEM)
-DOCKER_CAAS_SWAP=$(REDIS_CAAS_SWAP)
+DOCKER_MEM=$(REDIS_CAAS_MEM)
+DOCKER_SWAP=$(REDIS_CAAS_SWAP)
 
 ROOT_DIR=$(patsubst %/,%,$(dir $(realpath $(firstword $(MAKEFILE_LIST)))))
 DIR_BASENAME=$(shell basename $(ROOT_DIR))
@@ -88,17 +88,18 @@ else
 	COMPOSE_PROJECT_PORT=$(DOCKER_PORT)\r\n\
 	COMPOSE_PROJECT_BIND=\"$(DOCKER_BIND)\"\r\n\
 	COMPOSE_PROJECT_CPUS=\"$(DOCKER_CPUS)\"\r\n\
-	COMPOSE_PROJECT_MEM=\"$(DOCKER_CAAS_MEM)\"\r\n\
-	COMPOSE_PROJECT_SWAP=\"$(DOCKER_CAAS_SWAP)\"\r\n\
+	COMPOSE_PROJECT_MEM=\"$(DOCKER_MEM)\"\r\n\
+	COMPOSE_PROJECT_SWAP=\"$(DOCKER_SWAP)\"\r\n\
 	REDIS_ROOT_USER=\"$(REDIS_ROOT_USER)\"\r\n\
 	REDIS_ROOT_PASSWORD=\"$(REDIS_ROOT_PASS)\"\r\n\
-	REDIS_APP_USER=\"$(REDIS_APP_USER)\"\r\n\
-	REDIS_APP_PASSWORD=\"$(REDIS_APP_PASS)\"" > ./docker/.env; \
-	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" CACHE DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"has been set."${C_END};
-	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" CACHE DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Container: "${C_GRN}$(DOCKER_CONTAINER)${C_END}
-	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" CACHE DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Max. CPUs: "${C_GRN}$(DOCKER_CPUS)${C_END}
-	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" CACHE DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Max. memory usage: "${C_GRN}$(DOCKER_CAAS_MEM)${C_END}
-	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" CACHE DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Is going to be served at: "${C_GRN}http://127.0.0.1:$(DOCKER_PORT)${C_END}
+	REDIS_USER=\"$(REDIS_USER)\"\r\n\
+	REDIS_PASSWORD=\"$(REDIS_PASS)\"" > ./docker/.env; \
+	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" MEMORY DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - "${C_YEL}"docker-compose.yml"${C_END}" .env file "${C_GRN}"has been set."${C_END};
+	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" MEMORY DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Container: "${C_GRN}$(DOCKER_CONTAINER)${C_END}
+	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" MEMORY DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Max. CPUs: "${C_GRN}$(DOCKER_CPUS)${C_END}
+	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" MEMORY DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Max. memory: "${C_GRN}$(DOCKER_MEM)${C_END}" - Swap: "${C_GRN}$(DOCKER_SWAP)${C_END}
+	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" MEMORY DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Localhost: http://127.0.0.1:"${C_GRN}"$(DOCKER_PORT)"${C_END};
+	echo ${C_BLU}"$(PROJECT_NAME)"${C_END}" MEMORY DB "${C_YEL}$(DOCKER_PLTF)${C_END}" - Hostname: http://$(word 1,$(shell hostname -I)):"${C_GRN}"$(DOCKER_PORT)"${C_END};
 endif
 
 # -------------------------------------------------------------------------------------------------
@@ -121,20 +122,23 @@ info: ## shows container information
 ssh: ## enters the container shell
 	$(DOCKER_EXEC_SSH)
 
-build: ## builds the container from Dockerfile
-	cd docker && $(DOCKER_COMPOSE) up --build --no-recreate -d
+up: ## starts and recreates containers if compose config or image changed, runnning in detached mode
+	cd docker && $(DOCKER_COMPOSE) -f docker-compose.yml -f docker-compose.public.yml up -d
 
-up: ## attaches to containers for a service and also starts any linked services
-	cd docker && $(DOCKER_COMPOSE) up -d
+build: ## builds and ensures changes in the Dockerfile, build steps, or copied-in files are applied. Not --no-recreate
+	cd docker && $(DOCKER_COMPOSE) -f docker-compose.yml -f docker-compose.public.yml up --build -d
 
-start: ## starts the container and put on running
+network: ## starts up into an existing custom network for container-to-container communication, runnning in detached mode
+	cd docker && $(DOCKER_COMPOSE) -f docker-compose.yml -f docker-compose.network.yml up -d
+
+start: ## starts the container and put on running from latest configuration
 	cd docker && $(DOCKER_COMPOSE) start
 
 stop: ## stops the running container but data won't be destroyed
 	cd docker && $(DOCKER_COMPOSE) stop
 
-restart: ## execute this Makefile "stop" & "start" recipes
-	$(MAKE) stop start
+restart: ## restarts the running container
+	cd docker && $(DOCKER) restart $(DOCKER_CONTAINER)
 
 clear: ## removes container from Docker running containers
 	cd docker && $(DOCKER_COMPOSE) kill || true
@@ -142,25 +146,8 @@ clear: ## removes container from Docker running containers
 	cd docker && $(DOCKER_COMPOSE) down -v --remove-orphans || true
 
 destroy: ## delete container image from Docker cache
-	cd docker && $(DOCKER) rmi -f $(DOCKER_CONTAINER):$(DOCKER_IMGK)
-	$(SUDO) rm -rf ./redis-data
+	cd docker && $(DOCKER) rmi -f $(DOCKER_IMGK)
+	$(SUDO) rm -rf ./data ./log
 
 dev: ## sets a development enviroment
 	echo ${C_YEL}"\"dev\" recipe has not usage in this project"${C_END};
-
-network:
-	cd docker && $(DOCKER_COMPOSE) -f docker-compose.yml -f docker-compose.network.yml up -d
-
-# -------------------------------------------------------------------------------------------------
-#  Container settings update on the run
-# -------------------------------------------------------------------------------------------------
-.PHONY: nginx-conf php-conf php-fpm-conf
-
-nginx-conf: ## shows NGINX server block on running container
-	$(DOCKER) exec -i $(DOCKER_CONTAINER) sh -c 'cat /etc/nginx/conf.d/default.conf'
-
-php-conf: ## shows PHP configuration on running container
-	$(DOCKER) exec -i $(DOCKER_CONTAINER) sh -c 'cat /etc/php83/conf.d/custom.ini'
-
-php-fpm-conf: ## shows PHP-FPM configuration on running container
-	$(DOCKER) exec -i $(DOCKER_CONTAINER) sh -c 'cat /etc/php83/php-fpm.d/www.conf'

@@ -17,7 +17,7 @@ if [ "$(id -u)" = "0" ]; then
         cat > /data/users.acl <<EOF
 user default off
 user ${REDIS_ROOT_USER:-root} on >${REDIS_ROOT_PASSWORD:-changeme} ~* &* +@all
-user ${REDIS_APP_USER:-app} on >${REDIS_APP_PASSWORD:-changeme} ~* &* +@all -@dangerous -@admin
+user ${REDIS_USER:-app} on >${REDIS_PASSWORD:-changeme} ~* &* +@all -@dangerous -@admin
 EOF
         chown redis:redis /data/users.acl
         chmod 640 /data/users.acl

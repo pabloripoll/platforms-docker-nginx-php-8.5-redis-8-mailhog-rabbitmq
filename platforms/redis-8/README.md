@@ -15,6 +15,10 @@
 ![Alpine Linux](https://img.shields.io/badge/Alpine_Linux-%230D597F.svg?style=for-the-badge&logo=alpine-linux&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
+Redis (REmote DIctionary Server) is an open source, in-memory, NoSQL key/value store that is used primarily as an application cache or quick-response database.
+
+Redis stores data in memory, rather than on a disk or solid-state drive (SSD), which helps deliver unparalleled speed, reliability, and performance.
+
 RabbitMQ is a reliable and mature messaging and streaming broker, which is easy to deploy on cloud environments, on-premises, and on your local machine.
 
 Content:
@@ -29,6 +33,12 @@ Sources:
 - https://github.com/redis/docker-library-redis/alpine/
 - https://github.com/redis/docker-library-redis
 - https://github.com/redis/docker-library-redis/tree/40511fc518c300f3b48059daf43c7ac2ef97550b/alpine
+<br><br>
+
+Docs:
+- https://redis.io/
+- https://www.ibm.com/think/topics/redis
+- https://cloud.google.com/discover/what-is-redis-database?hl=en
 <br><br>
 
 ## <a id="configuration"></a>Service Configuration
