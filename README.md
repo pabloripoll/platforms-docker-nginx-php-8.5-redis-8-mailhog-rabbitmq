@@ -219,7 +219,7 @@ Repository directories structure overview
 │   │   │   └── Dockerfile
 │   │   └── Makefile
 │   │
-│   ├── postgre-18
+│   ├── redis-8
 │   │   ├── docker
 │   │   │   ├── .env
 │   │   │   ├── docker-compose.yml
